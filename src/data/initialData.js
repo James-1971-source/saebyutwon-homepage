@@ -447,14 +447,74 @@ export const INITIAL_POSTS = [
   }
 ];
 
-// 새론 스타일 '일정 안내' 데이터
+// 새론 + 구글 캘린더 스타일 '일정 안내' 데이터 (특정일 및 매주 반복 일정 지원)
 export const INITIAL_SCHEDULES = [
-  { id: "sch-1", month: "11월", date: "매주 화·목", title: "입소 아동 개별 미술·놀이 심리치료", category: "심리상담", target: "보호아동" },
-  { id: "sch-2", month: "11월", date: "매주 수요일", title: "기초 학력 향상 1:1 학습지원 멘토링", category: "프로그램", target: "학령기 아동" },
-  { id: "sch-3", month: "11월", date: "11월 14일(토)", title: "가을 문화체험활동 (어린이 뮤지컬 관람)", category: "문화체험", target: "전체 아동" },
-  { id: "sch-4", month: "11월", date: "11월 20일(금)", title: "11월 입소 아동 정기 소아청소년과 건강검진", category: "건강관리", target: "영유아·아동" },
-  { id: "sch-5", month: "11월", date: "11월 25일(수)", title: "11월 생일 맞이 도란도란 행복 파티", category: "생활행사", target: "전체 아동" },
-  { id: "sch-6", month: "11월", date: "11월 28일(토)", title: "지역사회 봉사단 연계 원내 환경소독 및 정리", category: "자원봉사", target: "생활관 전체" }
+  {
+    id: "sch-1",
+    month: "11월",
+    date: "매주 화·목",
+    dateStr: "",
+    repeatDays: [2, 4],
+    time: "15:00 ~ 17:00",
+    title: "입소 아동 개별 미술·놀이 심리치료",
+    category: "심리상담",
+    target: "보호아동"
+  },
+  {
+    id: "sch-2",
+    month: "11월",
+    date: "매주 수요일",
+    dateStr: "",
+    repeatDays: [3],
+    time: "16:00 ~ 18:00",
+    title: "기초 학력 향상 1:1 학습지원 멘토링",
+    category: "프로그램",
+    target: "학령기 아동"
+  },
+  {
+    id: "sch-3",
+    month: "11월",
+    date: "11월 14일(토)",
+    dateStr: "2026-11-14",
+    repeatDays: [],
+    time: "13:30 ~ 17:00",
+    title: "가을 문화체험활동 (어린이 뮤지컬 관람)",
+    category: "문화체험",
+    target: "전체 아동"
+  },
+  {
+    id: "sch-4",
+    month: "11월",
+    date: "11월 20일(금)",
+    dateStr: "2026-11-20",
+    repeatDays: [],
+    time: "10:00 ~ 12:00",
+    title: "11월 입소 아동 정기 소아청소년과 건강검진",
+    category: "건강관리",
+    target: "영유아·아동"
+  },
+  {
+    id: "sch-5",
+    month: "11월",
+    date: "11월 25일(수)",
+    dateStr: "2026-11-25",
+    repeatDays: [],
+    time: "17:00 ~ 18:30",
+    title: "11월 생일 맞이 도란도란 행복 파티",
+    category: "생활행사",
+    target: "전체 아동"
+  },
+  {
+    id: "sch-6",
+    month: "11월",
+    date: "11월 28일(토)",
+    dateStr: "2026-11-28",
+    repeatDays: [],
+    time: "10:00 ~ 13:00",
+    title: "지역사회 봉사단 연계 원내 환경소독 및 정리",
+    category: "자원봉사",
+    target: "생활관 전체"
+  }
 ];
 
 // 자주 묻는 질문 (FAQ)

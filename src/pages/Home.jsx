@@ -4,7 +4,8 @@ import {
   Plus, ChevronLeft, ChevronRight, Phone, Heart, Copy, MapPin, ArrowRight
 } from "lucide-react";
 import { FACILITY_INFO, INITIAL_BANNERS, INITIAL_SCHEDULES } from "../data/initialData";
-import { fetchPosts, fetchBanners } from "../services/firebase";
+import { fetchPosts, fetchBanners, fetchSchedules } from "../services/firebase";
+import { getEventsForDate } from "../components/ScheduleCalendar";
 
 export default function Home({ setRoute, openPostDetail }) {
   const [banners, setBanners] = useState(INITIAL_BANNERS);
@@ -13,6 +14,7 @@ export default function Home({ setRoute, openPostDetail }) {
 
   const [noticePosts, setNoticePosts] = useState([]);
   const [galleryPosts, setGalleryPosts] = useState([]);
+  const [schedules, setSchedules] = useState(INITIAL_SCHEDULES);
 
   // 달력 상태 (현재 월 기준)
   const today = new Date();
@@ -22,6 +24,9 @@ export default function Home({ setRoute, openPostDetail }) {
   useEffect(() => {
     fetchBanners(true).then((data) => {
       if (data && data.length > 0) setBanners(data);
+    });
+    fetchSchedules().then((data) => {
+      if (data && data.length > 0) setSchedules(data);
     });
     fetchPosts().then((data) => {
       setNoticePosts(data.filter((p) => p.category !== "gallery").slice(0, 5));
@@ -322,7 +327,9 @@ export default function Home({ setRoute, openPostDetail }) {
                 ))}
 
                 {calendarCells.map((day, idx) => {
-                  const hasEvent = day && (day === 14 || day === 20 || day === 25 || day === 28);
+                  const hasEvent = day
+                    ? getEventsForDate(new Date(calYear, calMonth, day), schedules).length > 0
+                    : false;
                   return (
                     <div
                       key={idx}
@@ -351,7 +358,7 @@ export default function Home({ setRoute, openPostDetail }) {
               </div>
 
               <div className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-                <span>이번 달 주요 일정 {INITIAL_SCHEDULES.length}건</span>
+                <span>등록 일정 {schedules.length}건</span>
                 <button
                   onClick={() => setRoute({ page: "board", tab: "board-schedule" })}
                   className="text-emerald-600 font-semibold hover:underline"

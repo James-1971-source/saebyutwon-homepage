@@ -3,6 +3,7 @@ import SmartEditor from "../components/SmartEditor";
 import {
   fetchPosts, createPost, updatePost, deletePost,
   fetchBanners, createBanner, updateBanner, deleteBanner, uploadFile,
+  fetchSchedules, createSchedule, updateSchedule, deleteSchedule,
   fetchDonations, updateDonationStatus, deleteDonation,
   fetchVolunteers, updateVolunteerStatus, deleteVolunteer,
   fetchInquiries, answerInquiry, deleteInquiry,
@@ -12,7 +13,7 @@ import {
 } from "../services/firebase";
 import {
   Lock, Plus, Edit, Trash2, ShieldCheck, UserCheck,
-  FileText, Heart, Users, MessageSquare, Database, Pin, UserPlus, Check, Image as ImageIcon
+  FileText, Heart, Users, MessageSquare, Database, Pin, UserPlus, Check, Image as ImageIcon, Calendar
 } from "lucide-react";
 
 const PERMISSION_OPTIONS = [
@@ -21,6 +22,7 @@ const PERMISSION_OPTIONS = [
   { key: "data", label: "자료실 관리", desc: "입소 의뢰서 등 서식 파일 등록/관리" },
   { key: "finance", label: "재정공시 관리", desc: "결산보고서 및 후원금 명세서 공시" },
   { key: "banners", label: "메인 배너 관리", desc: "메인 페이지 히어로 배너 이미지·문구 변경" },
+  { key: "schedules", label: "일정 안내 관리", desc: "캘린더 월간·주간·일간 일정 등록/관리" },
   { key: "donations", label: "후원 신청 관리", desc: "온라인 후원 신청자 확인 및 상태 변경" },
   { key: "volunteers", label: "자원봉사 신청 관리", desc: "자원봉사 신청자 확인 및 일정 관리" },
   { key: "inquiries", label: "1:1 상담 문의", desc: "비공개 상담 문의 열람 및 답변 등록" }
@@ -65,6 +67,19 @@ export default function Admin() {
     linkTab: "srv-admission",
     order: 1,
     isActive: true
+  });
+
+  // 일정 안내 관리 상태
+  const [schedules, setSchedules] = useState([]);
+  const [editingSchId, setEditingSchId] = useState(null);
+  const [schForm, setSchForm] = useState({
+    title: "",
+    category: "프로그램",
+    target: "전체 아동",
+    time: "14:00 ~ 16:00",
+    dateStr: new Date().toISOString().split("T")[0],
+    repeatDays: [],
+    date: ""
   });
 
   // 부관리자 관리 상태 (주관리자 전용)
@@ -120,9 +135,10 @@ export default function Admin() {
   }, [adminUser]);
 
   const loadAllData = async () => {
-    const [p, b, d, v, inq, subs] = await Promise.all([
+    const [p, b, sch, d, v, inq, subs] = await Promise.all([
       fetchPosts(),
       fetchBanners(false),
+      fetchSchedules(),
       fetchDonations(),
       fetchVolunteers(),
       fetchInquiries(),
@@ -130,6 +146,7 @@ export default function Admin() {
     ]);
     setPosts(p);
     setBanners(b);
+    setSchedules(sch);
     setDonations(d);
     setVolunteers(v);
     setInquiries(inq);
@@ -394,6 +411,79 @@ export default function Admin() {
     }
   };
 
+  // 일정 안내 관리 핸들러
+  const handleToggleRepeatDay = (dayNum) => {
+    setSchForm((prev) => {
+      const exists = prev.repeatDays.includes(dayNum);
+      return {
+        ...prev,
+        repeatDays: exists ? prev.repeatDays.filter((d) => d !== dayNum) : [...prev.repeatDays, dayNum].sort()
+      };
+    });
+  };
+
+  const handleSaveSchedule = async (e) => {
+    e.preventDefault();
+    if (!schForm.title.trim()) {
+      alert("일정 제목을 입력해주세요.");
+      return;
+    }
+    const dayLabels = ["일", "월", "화", "수", "목", "금", "토"];
+    const computedDateLabel =
+      schForm.repeatDays.length > 0
+        ? `매주 ${schForm.repeatDays.map((d) => dayLabels[d]).join("·")}`
+        : schForm.dateStr;
+
+    const payload = {
+      ...schForm,
+      date: schForm.date.trim() || computedDateLabel,
+      dateStr: schForm.repeatDays.length > 0 ? "" : schForm.dateStr
+    };
+
+    try {
+      if (editingSchId) {
+        await updateSchedule(editingSchId, payload);
+        alert("일정이 수정되었습니다.");
+      } else {
+        await createSchedule(payload);
+        alert("새 일정이 등록되었습니다.");
+      }
+      setEditingSchId(null);
+      setSchForm({
+        title: "",
+        category: "프로그램",
+        target: "전체 아동",
+        time: "14:00 ~ 16:00",
+        dateStr: new Date().toISOString().split("T")[0],
+        repeatDays: [],
+        date: ""
+      });
+      loadAllData();
+    } catch (err) {
+      alert("일정 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleEditSchedule = (s) => {
+    setEditingSchId(s.id);
+    setSchForm({
+      title: s.title || "",
+      category: s.category || "프로그램",
+      target: s.target || "전체 아동",
+      time: s.time || "",
+      dateStr: s.dateStr || new Date().toISOString().split("T")[0],
+      repeatDays: Array.isArray(s.repeatDays) ? s.repeatDays : [],
+      date: s.date || ""
+    });
+  };
+
+  const handleDeleteSchedule = async (id) => {
+    if (window.confirm("이 일정을 삭제하시겠습니까?")) {
+      await deleteSchedule(id);
+      loadAllData();
+    }
+  };
+
   // 로그인 화면
   if (!adminUser) {
     return (
@@ -570,6 +660,16 @@ export default function Admin() {
             >
               <ImageIcon size={16} />
               <span>메인 배너 관리 ({banners.length})</span>
+            </button>
+          )}
+
+          {hasPerm("schedules") && (
+            <button
+              onClick={() => setActiveTab("schedules")}
+              className={`tab-btn flex items-center gap-1.5 whitespace-nowrap ${activeTab === "schedules" ? "active" : ""}`}
+            >
+              <Calendar size={16} />
+              <span>일정 안내 관리 ({schedules.length})</span>
             </button>
           )}
 
@@ -1099,6 +1199,176 @@ export default function Admin() {
                       </button>
                       <button
                         onClick={() => handleDeleteBanner(b.id)}
+                        className="text-xs text-red-600 font-bold px-2.5 py-1.5 rounded hover:bg-red-50"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5-2. 일정 안내 관리 (구글 캘린더 + 메인 달력 위젯 연동) */}
+        {activeTab === "schedules" && hasPerm("schedules") && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-5 card-box p-6">
+              <h3 className="text-lg font-extrabold text-slate-900 mb-1 flex items-center gap-2">
+                <Calendar size={20} className="text-emerald-600" />
+                <span>{editingSchId ? "일정 수정" : "새 일정 등록"}</span>
+              </h3>
+              <p className="text-xs text-slate-500 mb-5">
+                등록한 일정은 [새볕 소식 &gt; 일정 안내(월간·주간·일간)] 및 메인 달력에 즉시 반영됩니다.
+              </p>
+
+              <form onSubmit={handleSaveSchedule} className="space-y-4">
+                <div className="form-group mb-0">
+                  <label className="form-label">일정 제목 *</label>
+                  <input
+                    type="text"
+                    required
+                    value={schForm.title}
+                    onChange={(e) => setSchForm({ ...schForm, title: e.target.value })}
+                    placeholder="예: 11월 입소 아동 정기 건강검진"
+                    className="form-input text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group mb-0">
+                    <label className="form-label">카테고리</label>
+                    <select
+                      value={schForm.category}
+                      onChange={(e) => setSchForm({ ...schForm, category: e.target.value })}
+                      className="form-select text-xs"
+                    >
+                      <option value="심리상담">심리상담</option>
+                      <option value="프로그램">프로그램</option>
+                      <option value="문화체험">문화체험</option>
+                      <option value="건강관리">건강관리</option>
+                      <option value="생활행사">생활행사</option>
+                      <option value="자원봉사">자원봉사</option>
+                    </select>
+                  </div>
+                  <div className="form-group mb-0">
+                    <label className="form-label">시간</label>
+                    <input
+                      type="text"
+                      value={schForm.time}
+                      onChange={(e) => setSchForm({ ...schForm, time: e.target.value })}
+                      placeholder="14:00 ~ 16:00"
+                      className="form-input text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group mb-0">
+                    <label className="form-label">특정 날짜 선택</label>
+                    <input
+                      type="date"
+                      disabled={schForm.repeatDays.length > 0}
+                      value={schForm.dateStr}
+                      onChange={(e) => setSchForm({ ...schForm, dateStr: e.target.value })}
+                      className="form-input text-xs disabled:bg-slate-100"
+                    />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label className="form-label">대상</label>
+                    <input
+                      type="text"
+                      value={schForm.target}
+                      onChange={(e) => setSchForm({ ...schForm, target: e.target.value })}
+                      placeholder="전체 아동"
+                      className="form-input text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group mb-0">
+                  <label className="form-label">매주 반복 요일 (선택 시 매주 해당 요일에 표시)</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["일", "월", "화", "수", "목", "금", "토"].map((label, idx) => {
+                      const active = schForm.repeatDays.includes(idx);
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => handleToggleRepeatDay(idx)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                            active
+                              ? "bg-[#28b899] text-white border-[#28b899]"
+                              : "bg-white text-slate-600 border-slate-200"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  {editingSchId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingSchId(null);
+                        setSchForm({
+                          title: "",
+                          category: "프로그램",
+                          target: "전체 아동",
+                          time: "14:00 ~ 16:00",
+                          dateStr: new Date().toISOString().split("T")[0],
+                          repeatDays: [],
+                          date: ""
+                        });
+                      }}
+                      className="btn-secondary text-xs py-2.5 px-4"
+                    >
+                      취소
+                    </button>
+                  )}
+                  <button type="submit" className="btn-primary flex-1 text-xs py-2.5">
+                    {editingSchId ? "일정 수정 저장" : "새 일정 등록하기"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="lg:col-span-7 card-box p-6">
+              <h3 className="text-lg font-extrabold text-slate-900 mb-4">
+                등록된 일정 목록 ({schedules.length}건)
+              </h3>
+              <div className="space-y-3">
+                {schedules.map((s) => (
+                  <div
+                    key={s.id}
+                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                          {s.category}
+                        </span>
+                        <span className="text-xs font-bold text-slate-600">
+                          {s.date || s.dateStr} {s.time ? `(${s.time})` : ""}
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-slate-900">{s.title}</div>
+                      <div className="text-xs text-slate-500">대상: {s.target || "전체 아동"}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditSchedule(s)}
+                        className="btn-secondary text-xs py-1.5 px-3"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSchedule(s.id)}
                         className="text-xs text-red-600 font-bold px-2.5 py-1.5 rounded hover:bg-red-50"
                       >
                         삭제

@@ -35,6 +35,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /schedules/{scheduleId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // 후원·자원봉사·1:1 문의: 생성만 누구나 허용, 조회·수정·삭제는 관리자만 허용
     match /donations/{donationId} {
       allow create: if true;

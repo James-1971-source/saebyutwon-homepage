@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { fetchPosts } from "../services/firebase";
+import { fetchPosts, fetchSchedules } from "../services/firebase";
 import { INITIAL_SCHEDULES } from "../data/initialData";
+import ScheduleCalendar from "../components/ScheduleCalendar";
 import {
   Search, Pin, Download, Calendar, Eye, User, FileText,
   ArrowLeft, Paperclip, ChevronRight, Clock
@@ -16,6 +17,7 @@ export default function Board({
   const [searchField, setSearchField] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [posts, setPosts] = useState([]);
+  const [schedules, setSchedules] = useState(INITIAL_SCHEDULES);
 
   useEffect(() => {
     if (defaultTab && defaultTab.startsWith("board-")) {
@@ -24,7 +26,9 @@ export default function Board({
   }, [defaultTab]);
 
   useEffect(() => {
-    if (activeCategory !== "schedule") {
+    if (activeCategory === "schedule") {
+      fetchSchedules().then(setSchedules);
+    } else {
       fetchPosts(activeCategory).then(setPosts);
     }
   }, [activeCategory]);
@@ -157,40 +161,8 @@ export default function Board({
             </div>
           </div>
         ) : activeCategory === "schedule" ? (
-          /* 일정 안내 (새론 스타일) */
-          <div className="card-box p-8 max-w-4xl mx-auto">
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-6 pb-4 border-b border-stone-200">
-              <div>
-                <span className="text-xs font-extrabold text-orange-600 uppercase">MONTHLY SCHEDULE</span>
-                <h2 className="text-2xl font-extrabold text-stone-900 mt-1">새볕원 이달의 주요 일정 안내</h2>
-              </div>
-              <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full">
-                <Clock size={13} /> 2026년 11월 일정
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {INITIAL_SCHEDULES.map((sch) => (
-                <div
-                  key={sch.id}
-                  className="p-4 rounded-xl border border-stone-200 bg-stone-50/70 flex flex-wrap items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="px-3 py-2 rounded-lg bg-orange-600 text-white text-xs font-extrabold min-w-[100px] text-center">
-                      {sch.date}
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-bold text-orange-600">[{sch.category}]</span>
-                      <h4 className="font-bold text-stone-900 text-base">{sch.title}</h4>
-                    </div>
-                  </div>
-                  <span className="text-xs bg-white border border-stone-200 text-stone-600 px-3 py-1 rounded-full font-semibold">
-                    대상: {sch.target}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          /* 일정 안내 (새론 + 구글 캘린더 스타일: 월간/주간/일간/목록) */
+          <ScheduleCalendar schedules={schedules} />
         ) : (
           <div>
             {/* 구분별 검색 바 */}

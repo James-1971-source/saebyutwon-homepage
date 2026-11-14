@@ -23,10 +23,11 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { INITIAL_POSTS, INITIAL_BANNERS } from "../data/initialData";
+import { INITIAL_POSTS, INITIAL_BANNERS, INITIAL_SCHEDULES } from "../data/initialData";
 
 const STORAGE_KEY_POSTS = "sbw_posts";
 const STORAGE_KEY_BANNERS = "sbw_banners";
+const STORAGE_KEY_SCHEDULES = "sbw_schedules";
 const STORAGE_KEY_DONATIONS = "sbw_donations";
 const STORAGE_KEY_VOLUNTEERS = "sbw_volunteers";
 const STORAGE_KEY_INQUIRIES = "sbw_inquiries";
@@ -54,6 +55,9 @@ const DEFAULT_FIREBASE_CONFIG = {
 function initLocalStorage() {
   if (!localStorage.getItem(STORAGE_KEY_POSTS)) {
     localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(INITIAL_POSTS));
+  }
+  if (!localStorage.getItem(STORAGE_KEY_SCHEDULES)) {
+    localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(INITIAL_SCHEDULES));
   }
   if (!localStorage.getItem(STORAGE_KEY_BANNERS)) {
     localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(INITIAL_BANNERS));
@@ -580,7 +584,7 @@ export async function resolveAdminProfile(email, uid = null) {
       email: normalized,
       name: "새볕원 주관리자",
       role: "super_admin",
-      permissions: ["notices", "gallery", "data", "finance", "banners", "donations", "volunteers", "inquiries", "sub_admins", "firebase"]
+      permissions: ["notices", "gallery", "data", "finance", "banners", "schedules", "donations", "volunteers", "inquiries", "sub_admins", "firebase"]
     };
   }
 
@@ -838,6 +842,84 @@ export async function deleteBanner(id) {
       await deleteDoc(doc(db, "banners", id));
     } catch (e) {
       console.warn("Firebase banner delete failed:", e);
+    }
+  }
+}
+
+// ================= 일정 안내 CRUD =================
+export async function fetchSchedules() {
+  let list = [];
+  if (isFirebaseConnected && db) {
+    try {
+      const snapshot = await getDocs(collection(db, "schedules"));
+      snapshot.forEach((d) => list.push({ ...d.data(), id: d.id }));
+      if (list.length > 0) {
+        localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(list));
+      }
+    } catch (err) {
+      console.warn("Fallback to LocalStorage schedules:", err);
+    }
+  }
+
+  if (list.length === 0) {
+    try {
+      list = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULES) || "[]");
+    } catch (e) {
+      list = INITIAL_SCHEDULES;
+    }
+    if (list.length === 0) list = INITIAL_SCHEDULES;
+  }
+
+  return list;
+}
+
+export async function createSchedule(data) {
+  const newItem = {
+    ...data,
+    id: "sbw-sch-" + Date.now(),
+    updatedAt: new Date().toISOString().split("T")[0]
+  };
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULES) || "[]");
+  list.unshift(newItem);
+  localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(list));
+
+  if (isFirebaseConnected && db) {
+    try {
+      await setDoc(doc(db, "schedules", newItem.id), newItem);
+    } catch (e) {
+      console.warn("Failed saving schedule to Firestore:", e);
+    }
+  }
+  return newItem;
+}
+
+export async function updateSchedule(id, updatedFields) {
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULES) || "[]");
+  const idx = list.findIndex((s) => s.id === id);
+  if (idx !== -1) {
+    list[idx] = { ...list[idx], ...updatedFields };
+    localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(list));
+  }
+  if (isFirebaseConnected && db) {
+    try {
+      await setDoc(doc(db, "schedules", id), { ...list[idx], ...updatedFields, id }, { merge: true });
+    } catch (e) {
+      console.warn("Firebase schedule update failed:", e);
+    }
+  }
+  return list[idx];
+}
+
+export async function deleteSchedule(id) {
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_SCHEDULES) || "[]").filter(
+    (s) => s.id !== id
+  );
+  localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(list));
+  if (isFirebaseConnected && db) {
+    try {
+      await deleteDoc(doc(db, "schedules", id));
+    } catch (e) {
+      console.warn("Firebase schedule delete failed:", e);
     }
   }
 }
