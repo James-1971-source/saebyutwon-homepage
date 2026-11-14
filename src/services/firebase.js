@@ -4,6 +4,7 @@ import { initializeApp, getApps } from "firebase/app";
 import {
   getFirestore,
   collection,
+  getDoc,
   getDocs,
   setDoc,
   updateDoc,
@@ -556,7 +557,7 @@ export async function logoutFirebase() {
   }
 }
 
-export async function resolveAdminProfile(email) {
+export async function resolveAdminProfile(email, uid = null) {
   const normalized = (email || "").trim().toLowerCase();
   if (SUPER_ADMIN_EMAILS.includes(normalized)) {
     return {
@@ -569,6 +570,19 @@ export async function resolveAdminProfile(email) {
 
   if (isFirebaseConnected && db) {
     try {
+      if (uid) {
+        const byUid = await getDoc(doc(db, "admin_users", uid));
+        if (byUid.exists()) {
+          const data = byUid.data();
+          return {
+            id: byUid.id,
+            email: data.email,
+            name: data.name || "부관리자",
+            role: data.role || "sub_admin",
+            permissions: data.permissions || []
+          };
+        }
+      }
       const q = query(collection(db, "admin_users"), where("email", "==", normalized));
       const snap = await getDocs(q);
       if (!snap.empty) {

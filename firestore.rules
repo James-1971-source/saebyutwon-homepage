@@ -1,21 +1,59 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email in [
+          'dsyun@sj-hs.or.kr',
+          'saebyutwon@hanmail.net',
+          'admin@saebyutwon.or.kr'
+        ];
+    }
+
+    function isSubAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() || isSubAdmin();
+    }
+
+    // 게시글: 읽기는 누구나 허용, 쓰기는 주관리자·부관리자만 허용
     match /posts/{postId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
+
+    // 후원·자원봉사·1:1 문의: 생성만 누구나 허용, 조회·수정·삭제는 관리자만 허용
     match /donations/{donationId} {
-      allow read, write: if true;
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
     }
+
     match /volunteers/{volunteerId} {
-      allow read, write: if true;
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
     }
+
     match /inquiries/{inquiryId} {
-      allow read, write: if true;
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
     }
+
+    // 부관리자 계정: 본인 조회 및 주관리자만 전체 조회·쓰기 허용
     match /admin_users/{userId} {
-      allow read, write: if true;
+      allow read: if isSuperAdmin()
+        || (isSignedIn() && (
+          request.auth.uid == userId
+          || (request.auth.token.email != null && resource.data.email == request.auth.token.email)
+        ));
+      allow write: if isSuperAdmin();
     }
   }
 }
-

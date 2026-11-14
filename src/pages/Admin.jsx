@@ -74,7 +74,7 @@ export default function Admin() {
   useEffect(() => {
     const unsub = subscribeAuth(async (fbUser) => {
       if (fbUser) {
-        const profile = await resolveAdminProfile(fbUser.email);
+        const profile = await resolveAdminProfile(fbUser.email, fbUser.uid);
         if (profile) {
           setAdminUser(profile);
         }
@@ -149,7 +149,7 @@ export default function Admin() {
     if (firebaseStatus.connected) {
       try {
         const fbUser = await loginWithFirebase(email, loginPassword);
-        const profile = await resolveAdminProfile(fbUser.email);
+        const profile = await resolveAdminProfile(fbUser.email, fbUser.uid);
         if (!profile) {
           await logoutFirebase();
           setLoginError("관리자 권한이 등록되지 않은 계정입니다.");
@@ -158,8 +158,14 @@ export default function Admin() {
         setAdminUser(profile);
         return;
       } catch (err) {
-        // Firebase 미초기화/데모 비밀번호 폴백 허용 여부 체크
-        if (err.message !== "FIREBASE_NOT_CONNECTED") {
+        // Firebase Auth 미설정 또는 테스트 계정 폴백 허용 여부 체크
+        const fallbackCodes = [
+          "auth/operation-not-allowed",
+          "auth/configuration-not-found",
+          "auth/user-not-found",
+          "auth/invalid-credential"
+        ];
+        if (err.message !== "FIREBASE_NOT_CONNECTED" && !fallbackCodes.includes(err.code)) {
           setLoginError("이메일 또는 비밀번호가 올바르지 않습니다.");
           return;
         }
