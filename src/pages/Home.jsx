@@ -29,12 +29,12 @@ export default function Home({ setRoute, openPostDetail }) {
     });
   }, []);
 
-  // 배너 자동 슬라이드 (6초)
+  // 배너 자동 슬라이드 (5초마다 오른쪽에서 왼쪽으로 부드럽게 이동)
   useEffect(() => {
     if (isPaused || banners.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % banners.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [isPaused, banners.length]);
 
@@ -116,93 +116,99 @@ export default function Home({ setRoute, openPostDetail }) {
     }
   ];
 
-  const activeBanner = banners[currentSlide] || INITIAL_BANNERS[0];
-
   return (
     <div className="home-page bg-white">
-      {/* 1. 새론 스타일 풀-와이드 메인 히어로 배너 슬라이더 (관리자에서 이미지·문구 수정 가능) */}
+      {/* 1. 새론 스타일 풀-와이드 메인 히어로 배너 슬라이더 (5초마다 우→좌 슬라이드 이동) */}
       <section
         className="saeron-hero-slider"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         <div
-          className="saeron-hero-slide"
-          style={{ backgroundImage: `url('${activeBanner.image || "/images/banner_real_2.jpg"}')` }}
+          className="saeron-hero-track"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
-          <div className="saeron-hero-overlay"></div>
+          {banners.map((banner, idx) => (
+            <div key={banner.id || idx} className="saeron-hero-slide">
+              <div
+                className={`saeron-hero-bg ${idx === currentSlide ? "active" : ""}`}
+                style={{ backgroundImage: `url('${banner.image || "/images/banner_real_1.jpg"}')` }}
+              />
+              <div className="saeron-hero-overlay"></div>
 
-          <div className="container relative z-10 h-full flex flex-col justify-center">
-            <div className="max-w-2xl text-white">
-              <div className="saeron-hero-eyebrow">
-                <span>{activeBanner.subtitle || "아동일시보호시설 새볕원"}</span>
-                <span className="saeron-eyebrow-line"></span>
-              </div>
+              <div className="container relative z-10 h-full flex flex-col justify-center">
+                <div className={`max-w-2xl text-white saeron-hero-text ${idx === currentSlide ? "active" : ""}`}>
+                  <div className="saeron-hero-eyebrow">
+                    <span>{banner.subtitle || "아동일시보호시설 새볕원"}</span>
+                    <span className="saeron-eyebrow-line"></span>
+                  </div>
 
-              <h1 className="saeron-hero-title">
-                {(activeBanner.title || "").split("\n").map((line, i) => (
-                  <React.Fragment key={i}>
-                    {line}
-                    {i < (activeBanner.title || "").split("\n").length - 1 && <br />}
-                  </React.Fragment>
-                ))}
-              </h1>
+                  <h1 className="saeron-hero-title">
+                    {(banner.title || "").split("\n").map((line, i) => (
+                      <React.Fragment key={i}>
+                        {line}
+                        {i < (banner.title || "").split("\n").length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </h1>
 
-              {activeBanner.description && (
-                <p className="saeron-hero-desc">{activeBanner.description}</p>
-              )}
+                  {banner.description && (
+                    <p className="saeron-hero-desc">{banner.description}</p>
+                  )}
 
-              {activeBanner.linkText && (
-                <div className="mt-6">
-                  <button
-                    onClick={() =>
-                      setRoute({
-                        page: activeBanner.linkPage || "services",
-                        tab: activeBanner.linkTab || "srv-admission"
-                      })
-                    }
-                    className="saeron-hero-cta"
-                  >
-                    <span>{activeBanner.linkText}</span>
-                    <ArrowRight size={16} />
-                  </button>
+                  {banner.linkText && (
+                    <div className="mt-6">
+                      <button
+                        onClick={() =>
+                          setRoute({
+                            page: banner.linkPage || "services",
+                            tab: banner.linkTab || "srv-admission"
+                          })
+                        }
+                        className="saeron-hero-cta"
+                      >
+                        <span>{banner.linkText}</span>
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* 좌우 화살표 버튼 (새론 스타일) */}
-          {banners.length > 1 && (
-            <>
-              <button
-                onClick={prevSlide}
-                className="saeron-slider-arrow left-0"
-                aria-label="이전 배너"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="saeron-slider-arrow right-0"
-                aria-label="다음 배너"
-              >
-                <ChevronRight size={20} />
-              </button>
-
-              {/* 인디케이터 점 */}
-              <div className="saeron-slider-dots">
-                {banners.map((b, idx) => (
-                  <button
-                    key={b.id || idx}
-                    onClick={() => setCurrentSlide(idx)}
-                    className={`saeron-dot ${idx === currentSlide ? "active" : ""}`}
-                    aria-label={`배너 ${idx + 1}`}
-                  />
-                ))}
               </div>
-            </>
-          )}
+            </div>
+          ))}
         </div>
+
+        {/* 좌우 화살표 버튼 (새론 스타일) */}
+        {banners.length > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="saeron-slider-arrow left-0"
+              aria-label="이전 배너"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="saeron-slider-arrow right-0"
+              aria-label="다음 배너"
+            >
+              <ChevronRight size={20} />
+            </button>
+
+            {/* 인디케이터 점 */}
+            <div className="saeron-slider-dots">
+              {banners.map((b, idx) => (
+                <button
+                  key={b.id || idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`saeron-dot ${idx === currentSlide ? "active" : ""}`}
+                  aria-label={`배너 ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       {/* 2. 새론 스타일 ABOUT US 섹션 (민트 타이틀 + 5개 아이콘 카드 + Read More 버튼) */}

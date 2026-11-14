@@ -484,7 +484,7 @@ export const INITIAL_BANNERS = [
     subtitle: "아동일시보호시설 새볕원",
     title: "아이들이 꿈꾸는 세상과\n새볕원이 꿈꾸는 세상은 같습니다.",
     description: "일시적인 보호가 필요한 아이들에게 24시간 안전한 울타리와 따뜻한 회복의 시간을 선물합니다.",
-    image: "/images/banner_real_2.jpg",
+    image: "/images/banner_real_1.jpg",
     linkText: "입소대상 및 절차 안내",
     linkPage: "services",
     linkTab: "srv-admission",
@@ -496,11 +496,35 @@ export const INITIAL_BANNERS = [
     subtitle: "함께하는 나눔 · 1955년부터 이어온 사랑",
     title: "아이들의 오늘을 지키고\n내일을 함께 준비합니다.",
     description: "당신의 작은 관심과 후원이 보호아동에게 내일을 꿈꿀 수 있는 큰 희망이 됩니다.",
-    image: "/images/banner_real_1.jpg",
+    image: "/images/banner_real_2.jpg",
     linkText: "후원 및 자원봉사 참여",
     linkPage: "support",
     linkTab: "sup-donation",
     order: 2,
+    isActive: true
+  },
+  {
+    id: "sbw-banner-3",
+    subtitle: "초기 위기개입 · 심리치유 전문기관",
+    title: "상처받은 마음이 다시 웃을 수 있도록\n든든한 곁이 되어줍니다.",
+    description: "전문 심리상담과 개별 맞춤 돌봄을 통해 아이들의 정서적 안정과 건강한 성장을 돕습니다.",
+    image: "/images/banner_real_3.jpg",
+    linkText: "심리상담 · 서비스 안내",
+    linkPage: "services",
+    linkTab: "srv-counseling",
+    order: 3,
+    isActive: true
+  },
+  {
+    id: "sbw-banner-4",
+    subtitle: "사회복지법인 새볕재단 산하",
+    title: "모든 아이들이 존중받고\n스스로 빛나는 내일을 응원합니다.",
+    description: "70년 역사의 사회복지 전문성과 지역사회의 따뜻한 연대로 아이들의 미래를 열어갑니다.",
+    image: "/images/banner_real_4.jpg",
+    linkText: "새볕원 소개 보기",
+    linkPage: "about",
+    linkTab: "about-greeting",
+    order: 4,
     isActive: true
   }
 ];
