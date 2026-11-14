@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import SmartEditor from "../components/SmartEditor";
 import {
   fetchPosts, createPost, updatePost, deletePost,
+  fetchBanners, createBanner, updateBanner, deleteBanner, uploadFile,
   fetchDonations, updateDonationStatus, deleteDonation,
   fetchVolunteers, updateVolunteerStatus, deleteVolunteer,
   fetchInquiries, answerInquiry, deleteInquiry,
@@ -11,7 +12,7 @@ import {
 } from "../services/firebase";
 import {
   Lock, Plus, Edit, Trash2, ShieldCheck, UserCheck,
-  FileText, Heart, Users, MessageSquare, Database, Pin, UserPlus, Check
+  FileText, Heart, Users, MessageSquare, Database, Pin, UserPlus, Check, Image as ImageIcon
 } from "lucide-react";
 
 const PERMISSION_OPTIONS = [
@@ -19,6 +20,7 @@ const PERMISSION_OPTIONS = [
   { key: "gallery", label: "새볕 갤러리 관리", desc: "활동 사진 및 소식 등록/수정/삭제" },
   { key: "data", label: "자료실 관리", desc: "입소 의뢰서 등 서식 파일 등록/관리" },
   { key: "finance", label: "재정공시 관리", desc: "결산보고서 및 후원금 명세서 공시" },
+  { key: "banners", label: "메인 배너 관리", desc: "메인 페이지 히어로 배너 이미지·문구 변경" },
   { key: "donations", label: "후원 신청 관리", desc: "온라인 후원 신청자 확인 및 상태 변경" },
   { key: "volunteers", label: "자원봉사 신청 관리", desc: "자원봉사 신청자 확인 및 일정 관리" },
   { key: "inquiries", label: "1:1 상담 문의", desc: "비공개 상담 문의 열람 및 답변 등록" }
@@ -49,6 +51,21 @@ export default function Admin() {
   const [volunteers, setVolunteers] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [answerText, setAnswerText] = useState({});
+
+  // 메인 배너 관리 상태
+  const [banners, setBanners] = useState([]);
+  const [editingBannerId, setEditingBannerId] = useState(null);
+  const [bannerForm, setBannerForm] = useState({
+    subtitle: "아동일시보호시설 새볕원",
+    title: "",
+    description: "",
+    image: "/images/hero_banner.jpg",
+    linkText: "입소대상 및 절차 안내",
+    linkPage: "services",
+    linkTab: "srv-admission",
+    order: 1,
+    isActive: true
+  });
 
   // 부관리자 관리 상태 (주관리자 전용)
   const [subAdmins, setSubAdmins] = useState([]);
@@ -103,14 +120,16 @@ export default function Admin() {
   }, [adminUser]);
 
   const loadAllData = async () => {
-    const [p, d, v, inq, subs] = await Promise.all([
+    const [p, b, d, v, inq, subs] = await Promise.all([
       fetchPosts(),
+      fetchBanners(false),
       fetchDonations(),
       fetchVolunteers(),
       fetchInquiries(),
       fetchSubAdmins()
     ]);
     setPosts(p);
+    setBanners(b);
     setDonations(d);
     setVolunteers(v);
     setInquiries(inq);
@@ -309,6 +328,72 @@ export default function Admin() {
     }
   };
 
+  // 메인 배너 관리 핸들러
+  const handleBannerImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await uploadFile(file);
+      setBannerForm((prev) => ({ ...prev, image: res.url }));
+    } catch (err) {
+      alert("배너 이미지 업로드 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleSaveBanner = async (e) => {
+    e.preventDefault();
+    if (!bannerForm.title.trim()) {
+      alert("배너 메인 문구를 입력해주세요.");
+      return;
+    }
+    try {
+      if (editingBannerId) {
+        await updateBanner(editingBannerId, bannerForm);
+        alert("메인 배너가 수정되었습니다.");
+      } else {
+        await createBanner(bannerForm);
+        alert("새 메인 배너가 등록되었습니다.");
+      }
+      setEditingBannerId(null);
+      setBannerForm({
+        subtitle: "아동일시보호시설 새볕원",
+        title: "",
+        description: "",
+        image: "/images/hero_banner.jpg",
+        linkText: "입소대상 및 절차 안내",
+        linkPage: "services",
+        linkTab: "srv-admission",
+        order: banners.length + 1,
+        isActive: true
+      });
+      loadAllData();
+    } catch (err) {
+      alert("배너 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleEditBanner = (b) => {
+    setEditingBannerId(b.id);
+    setBannerForm({
+      subtitle: b.subtitle || "",
+      title: b.title || "",
+      description: b.description || "",
+      image: b.image || "/images/hero_banner.jpg",
+      linkText: b.linkText || "",
+      linkPage: b.linkPage || "services",
+      linkTab: b.linkTab || "srv-admission",
+      order: b.order || 1,
+      isActive: b.isActive !== false
+    });
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (window.confirm("이 메인 배너를 삭제하시겠습니까?")) {
+      await deleteBanner(id);
+      loadAllData();
+    }
+  };
+
   // 로그인 화면
   if (!adminUser) {
     return (
@@ -475,6 +560,16 @@ export default function Admin() {
             >
               <MessageSquare size={16} />
               <span>1:1 상담 문의 ({inquiries.length})</span>
+            </button>
+          )}
+
+          {hasPerm("banners") && (
+            <button
+              onClick={() => setActiveTab("banners")}
+              className={`tab-btn flex items-center gap-1.5 whitespace-nowrap ${activeTab === "banners" ? "active" : ""}`}
+            >
+              <ImageIcon size={16} />
+              <span>메인 배너 관리 ({banners.length})</span>
             </button>
           )}
 
@@ -829,6 +924,190 @@ export default function Admin() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* 5-1. 메인 배너 관리 (새론 스타일 히어로 슬라이더 편집) */}
+        {activeTab === "banners" && hasPerm("banners") && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-5 card-box p-6">
+              <h3 className="text-lg font-extrabold text-slate-900 mb-1 flex items-center gap-2">
+                <ImageIcon size={20} className="text-emerald-600" />
+                <span>{editingBannerId ? "메인 배너 수정" : "새 메인 배너 등록"}</span>
+              </h3>
+              <p className="text-xs text-slate-500 mb-5">
+                메인 페이지 상단 풀-와이드 배너 슬라이드의 이미지와 문구를 언제든 변경할 수 있습니다.
+              </p>
+
+              <form onSubmit={handleSaveBanner} className="space-y-4">
+                <div className="form-group mb-0">
+                  <label className="form-label">상단 소제목 (Eyebrow)</label>
+                  <input
+                    type="text"
+                    value={bannerForm.subtitle}
+                    onChange={(e) => setBannerForm({ ...bannerForm, subtitle: e.target.value })}
+                    placeholder="예: 아동일시보호시설 새볕원"
+                    className="form-input text-sm"
+                  />
+                </div>
+
+                <div className="form-group mb-0">
+                  <label className="form-label">메인 슬로건 문구 * (줄바꿈은 Enter)</label>
+                  <textarea
+                    rows="3"
+                    required
+                    value={bannerForm.title}
+                    onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
+                    placeholder={"아이들이 꿈꾸는 세상과\n새볕원이 꿈꾸는 세상은 같습니다."}
+                    className="form-textarea text-sm"
+                  />
+                </div>
+
+                <div className="form-group mb-0">
+                  <label className="form-label">보조 설명 (선택)</label>
+                  <input
+                    type="text"
+                    value={bannerForm.description}
+                    onChange={(e) => setBannerForm({ ...bannerForm, description: e.target.value })}
+                    placeholder="배너 하단 설명 문구"
+                    className="form-input text-sm"
+                  />
+                </div>
+
+                <div className="form-group mb-0">
+                  <label className="form-label">배너 배경 이미지 (업로드 또는 경로 입력)</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={bannerForm.image}
+                      onChange={(e) => setBannerForm({ ...bannerForm, image: e.target.value })}
+                      placeholder="/images/hero_banner.jpg 또는 https://..."
+                      className="form-input text-xs flex-1"
+                    />
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerImageUpload}
+                    className="text-xs text-slate-600"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group mb-0">
+                    <label className="form-label">버튼 문구 (비우면 숨김)</label>
+                    <input
+                      type="text"
+                      value={bannerForm.linkText}
+                      onChange={(e) => setBannerForm({ ...bannerForm, linkText: e.target.value })}
+                      placeholder="예: 입소절차 안내"
+                      className="form-input text-xs"
+                    />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label className="form-label">노출 순서</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={bannerForm.order}
+                      onChange={(e) => setBannerForm({ ...bannerForm, order: Number(e.target.value) })}
+                      className="form-input text-xs"
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={bannerForm.isActive}
+                    onChange={(e) => setBannerForm({ ...bannerForm, isActive: e.target.checked })}
+                  />
+                  <span>메인 페이지에 배너 노출하기</span>
+                </label>
+
+                <div className="flex gap-2 pt-2">
+                  {editingBannerId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingBannerId(null);
+                        setBannerForm({
+                          subtitle: "아동일시보호시설 새볕원",
+                          title: "",
+                          description: "",
+                          image: "/images/hero_banner.jpg",
+                          linkText: "입소대상 및 절차 안내",
+                          linkPage: "services",
+                          linkTab: "srv-admission",
+                          order: banners.length + 1,
+                          isActive: true
+                        });
+                      }}
+                      className="btn-secondary text-xs py-2.5 px-4"
+                    >
+                      취소
+                    </button>
+                  )}
+                  <button type="submit" className="btn-primary flex-1 text-xs py-2.5">
+                    {editingBannerId ? "배너 수정 저장" : "새 배너 등록하기"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="lg:col-span-7 card-box p-6">
+              <h3 className="text-lg font-extrabold text-slate-900 mb-4">
+                등록된 메인 배너 목록 ({banners.length}건)
+              </h3>
+              <div className="space-y-4">
+                {banners.map((b) => (
+                  <div
+                    key={b.id}
+                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={b.image || "/images/hero_banner.jpg"}
+                        alt={b.title}
+                        className="w-28 h-16 object-cover rounded-lg border border-slate-200 shrink-0"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                            순서 {b.order || 1}
+                          </span>
+                          <span
+                            className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                              b.isActive !== false ? "bg-sky-100 text-sky-700" : "bg-slate-200 text-slate-600"
+                            }`}
+                          >
+                            {b.isActive !== false ? "노출 중" : "숨김"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-500">{b.subtitle}</div>
+                        <div className="text-sm font-bold text-slate-900 whitespace-pre-line leading-snug">
+                          {b.title}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => handleEditBanner(b)}
+                        className="btn-secondary text-xs py-1.5 px-3"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDeleteBanner(b.id)}
+                        className="text-xs text-red-600 font-bold px-2.5 py-1.5 rounded hover:bg-red-50"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

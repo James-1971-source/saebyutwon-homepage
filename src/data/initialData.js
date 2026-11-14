@@ -477,3 +477,31 @@ export const FAQ_ITEMS = [
   }
 ];
 
+// 메인 히어로 배너 초기 데이터 (관리자 센터에서 언제든 수정·추가·삭제 가능)
+export const INITIAL_BANNERS = [
+  {
+    id: "sbw-banner-1",
+    subtitle: "아동일시보호시설 새볕원",
+    title: "아이들이 꿈꾸는 세상과\n새볕원이 꿈꾸는 세상은 같습니다.",
+    description: "일시적인 보호가 필요한 아이들에게 24시간 안전한 울타리와 따뜻한 회복의 시간을 선물합니다.",
+    image: "/images/hero_banner.jpg",
+    linkText: "입소대상 및 절차 안내",
+    linkPage: "services",
+    linkTab: "srv-admission",
+    order: 1,
+    isActive: true
+  },
+  {
+    id: "sbw-banner-2",
+    subtitle: "함께하는 나눔 · 1955년부터 이어온 사랑",
+    title: "아이들의 오늘을 지키고\n내일을 함께 준비합니다.",
+    description: "당신의 작은 관심과 후원이 보호아동에게 내일을 꿈꿀 수 있는 큰 희망이 됩니다.",
+    image: "/images/saebyeotwon.jpg",
+    linkText: "후원 및 자원봉사 참여",
+    linkPage: "support",
+    linkTab: "sup-donation",
+    order: 2,
+    isActive: true
+  }
+];
+

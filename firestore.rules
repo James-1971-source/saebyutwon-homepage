@@ -24,8 +24,13 @@ service cloud.firestore {
       return isSuperAdmin() || isSubAdmin();
     }
 
-    // 게시글: 읽기는 누구나 허용, 쓰기는 주관리자·부관리자만 허용
+    // 게시글 및 메인 배너: 읽기는 누구나 허용, 쓰기는 주관리자·부관리자만 허용
     match /posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /banners/{bannerId} {
       allow read: if true;
       allow write: if isAdmin();
     }

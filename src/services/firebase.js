@@ -23,9 +23,10 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { INITIAL_POSTS } from "../data/initialData";
+import { INITIAL_POSTS, INITIAL_BANNERS } from "../data/initialData";
 
 const STORAGE_KEY_POSTS = "sbw_posts";
+const STORAGE_KEY_BANNERS = "sbw_banners";
 const STORAGE_KEY_DONATIONS = "sbw_donations";
 const STORAGE_KEY_VOLUNTEERS = "sbw_volunteers";
 const STORAGE_KEY_INQUIRIES = "sbw_inquiries";
@@ -53,6 +54,9 @@ const DEFAULT_FIREBASE_CONFIG = {
 function initLocalStorage() {
   if (!localStorage.getItem(STORAGE_KEY_POSTS)) {
     localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(INITIAL_POSTS));
+  }
+  if (!localStorage.getItem(STORAGE_KEY_BANNERS)) {
+    localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(INITIAL_BANNERS));
   }
   if (!localStorage.getItem(STORAGE_KEY_DONATIONS)) {
     localStorage.setItem(
@@ -564,7 +568,7 @@ export async function resolveAdminProfile(email, uid = null) {
       email: normalized,
       name: "새볕원 주관리자",
       role: "super_admin",
-      permissions: ["notices", "gallery", "data", "finance", "donations", "volunteers", "inquiries", "sub_admins", "firebase"]
+      permissions: ["notices", "gallery", "data", "finance", "banners", "donations", "volunteers", "inquiries", "sub_admins", "firebase"]
     };
   }
 
@@ -732,5 +736,97 @@ export async function uploadFile(file) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+// ================= 메인 히어로 배너 CRUD =================
+export async function fetchBanners(onlyActive = false) {
+  let banners = [];
+  if (isFirebaseConnected && db) {
+    try {
+      const q = query(collection(db, "banners"), orderBy("order", "asc"));
+      const snapshot = await getDocs(q);
+      snapshot.forEach((d) => banners.push({ ...d.data(), id: d.id }));
+      if (banners.length > 0) {
+        localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(banners));
+      }
+    } catch (err) {
+      console.warn("Fallback to LocalStorage banners:", err);
+    }
+  }
+
+  if (banners.length === 0) {
+    try {
+      banners = JSON.parse(localStorage.getItem(STORAGE_KEY_BANNERS) || "[]");
+    } catch (e) {
+      banners = INITIAL_BANNERS;
+    }
+    if (banners.length === 0) banners = INITIAL_BANNERS;
+  }
+
+  banners.sort((a, b) => (a.order || 99) - (b.order || 99));
+  return onlyActive ? banners.filter((b) => b.isActive !== false) : banners;
+}
+
+export async function createBanner(bannerData) {
+  const newBanner = {
+    ...bannerData,
+    id: "sbw-banner-" + Date.now(),
+    order: Number(bannerData.order) || 1,
+    isActive: bannerData.isActive !== false,
+    updatedAt: new Date().toISOString().split("T")[0]
+  };
+
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_BANNERS) || "[]");
+  list.push(newBanner);
+  list.sort((a, b) => (a.order || 99) - (b.order || 99));
+  localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(list));
+
+  if (isFirebaseConnected && db) {
+    try {
+      await setDoc(doc(db, "banners", newBanner.id), newBanner);
+    } catch (e) {
+      console.warn("Failed saving banner to Firestore:", e);
+    }
+  }
+  return newBanner;
+}
+
+export async function updateBanner(id, updatedFields) {
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_BANNERS) || "[]");
+  const idx = list.findIndex((b) => b.id === id);
+  const payload = {
+    ...updatedFields,
+    order: Number(updatedFields.order) || 1,
+    updatedAt: new Date().toISOString().split("T")[0]
+  };
+  if (idx !== -1) {
+    list[idx] = { ...list[idx], ...payload };
+    list.sort((a, b) => (a.order || 99) - (b.order || 99));
+    localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(list));
+  }
+
+  if (isFirebaseConnected && db) {
+    try {
+      await setDoc(doc(db, "banners", id), { ...list[idx], ...payload, id }, { merge: true });
+    } catch (e) {
+      console.warn("Firebase banner update failed:", e);
+    }
+  }
+  return list[idx];
+}
+
+export async function deleteBanner(id) {
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY_BANNERS) || "[]").filter(
+    (b) => b.id !== id
+  );
+  localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(list));
+
+  if (isFirebaseConnected && db) {
+    try {
+      await deleteDoc(doc(db, "banners", id));
+    } catch (e) {
+      console.warn("Firebase banner delete failed:", e);
+    }
+  }
 }
 

@@ -1,27 +1,27 @@
 /* ========================================================
-   아동일시보호시설 새볕원 통합 디자인 시스템 (대전 새론 스타일 웜 파스텔 테마)
+   아동일시보호시설 새볕원 통합 디자인 시스템 (대전 새론 스타일 민트 & 화이트 테마)
    ======================================================== */
 
 @import "tailwindcss";
 
 :root {
-  --primary-50: #fff7ed;
-  --primary-100: #ffedd5;
-  --primary-200: #fed7aa;
-  --primary-400: #fb923c;
-  --primary-500: #f97316;
-  --primary-600: #ea580c;
-  --primary-700: #c2410c;
+  --primary-50: #eefaf7;
+  --primary-100: #d1f4ec;
+  --primary-200: #a7eadb;
+  --primary-400: #3dd1b0;
+  --primary-500: #28b899;
+  --primary-600: #1ea386;
+  --primary-700: #16846d;
 
-  --warm-cream: #fffbf5;
-  --warm-peach: #fff1e6;
-  --warm-sage: #eef7f2;
+  --warm-cream: #ffffff;
+  --warm-peach: #f8fafb;
+  --warm-sage: #eefaf7;
 
-  --secondary-800: #292524;
-  --secondary-900: #1c1917;
+  --secondary-800: #1f2937;
+  --secondary-900: #111827;
 
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.08);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.06);
   --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.08);
   --shadow-xl: 0 20px 30px -6px rgb(0 0 0 / 0.12);
 
@@ -41,8 +41,8 @@
 
 body {
   font-family: var(--font-base);
-  color: #292524;
-  background-color: var(--warm-cream);
+  color: #1f2937;
+  background-color: #ffffff;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -106,15 +106,15 @@ button {
   background: var(--primary-600);
 }
 
-/* ================= 헤더 & GNB ================= */
+/* ================= 헤더 & GNB (새론 스타일 화이트 단일 헤더) ================= */
 .header {
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
   z-index: 1000;
-  box-shadow: 0 2px 12px rgba(41, 37, 36, 0.06);
-  border-bottom: 1px solid #f5ebe0;
+  box-shadow: 0 1px 8px rgba(15, 23, 42, 0.06);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .header-inner {
@@ -127,7 +127,7 @@ button {
 .gnb-nav {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 36px;
 }
 
 .nav-item {
@@ -137,7 +137,7 @@ button {
 .nav-link {
   font-size: 15.5px;
   font-weight: 700;
-  color: #292524;
+  color: #334155;
   padding: 28px 0;
   display: flex;
   align-items: center;
@@ -146,7 +146,7 @@ button {
 }
 
 .nav-link:hover, .nav-link.active {
-  color: var(--primary-600);
+  color: var(--primary-500);
 }
 
 .sub-menu {
@@ -155,11 +155,11 @@ button {
   left: 50%;
   transform: translateX(-50%) translateY(8px);
   background: #fff;
-  min-width: 205px;
+  min-width: 210px;
   padding: 10px 0;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
-  border: 1px solid #f5ebe0;
+  border: 1px solid #e2e8f0;
   opacity: 0;
   pointer-events: none;
   transition: var(--transition);
@@ -176,7 +176,7 @@ button {
   padding: 9px 18px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #44403c;
+  color: #475569;
   transition: var(--transition);
 }
 
@@ -186,41 +186,355 @@ button {
   padding-left: 22px;
 }
 
-.header-cta-btn {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  color: #fff;
+.saeron-header-cta {
+  background: #28b899;
+  color: #ffffff;
   font-weight: 700;
-  font-size: 13.5px;
-  padding: 10px 18px;
+  font-size: 14px;
+  padding: 10px 24px;
   border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.28);
+  justify-content: center;
   transition: var(--transition);
 }
 
-.header-cta-btn:hover {
+.saeron-header-cta:hover {
+  background: #1ea386;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 184, 153, 0.3);
+}
+
+.saeron-admin-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.saeron-admin-btn:hover {
+  border-color: #28b899;
+  color: #28b899;
+  background: #eefaf7;
+}
+
+/* ================= 새론 스타일 풀-와이드 히어로 배너 슬라이더 ================= */
+.saeron-hero-slider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.saeron-hero-slide {
+  position: relative;
+  width: 100%;
+  height: 490px;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.5s ease;
+}
+
+.saeron-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.38) 55%, rgba(15, 23, 42, 0.2) 100%);
+}
+
+.saeron-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 14px;
+}
+
+.saeron-eyebrow-line {
+  display: inline-block;
+  width: 64px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.saeron-hero-title {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.32;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.saeron-hero-desc {
+  margin-top: 14px;
+  font-size: 15.5px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.65;
+  max-width: 540px;
+}
+
+.saeron-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #28b899;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 22px;
+  border-radius: var(--radius-full);
+  transition: var(--transition);
+}
+
+.saeron-hero-cta:hover {
+  background: #1ea386;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.38);
 }
 
-.header-sub-cta-btn {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #fed7aa;
-  font-weight: 700;
-  font-size: 13.5px;
-  padding: 9px 16px;
-  border-radius: var(--radius-full);
-  display: inline-flex;
+.saeron-slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #334155;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  z-index: 20;
   transition: var(--transition);
 }
 
-.header-sub-cta-btn:hover {
-  background: #ffedd5;
+.saeron-slider-arrow:hover {
+  background: #28b899;
+  color: #ffffff;
+}
+
+.saeron-slider-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.saeron-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.45);
+  transition: var(--transition);
+}
+
+.saeron-dot.active {
+  width: 28px;
+  background: #28b899;
+}
+
+/* ================= 새론 스타일 ABOUT US 섹션 ================= */
+.saeron-about-heading {
+  font-size: 36px;
+  font-weight: 900;
+  color: #28b899;
+  letter-spacing: 1px;
+}
+
+.saeron-about-card {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 34px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.saeron-about-card:hover {
+  border-color: #28b899;
+  box-shadow: 0 10px 24px rgba(40, 184, 153, 0.1);
+  transform: translateY(-4px);
+}
+
+.saeron-about-icon {
+  color: #28b899;
+  margin-bottom: 18px;
+}
+
+.saeron-about-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.saeron-readmore-btn {
+  display: inline-block;
+  background: #28b899;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 22px;
+  border-radius: var(--radius-full);
+  transition: var(--transition);
+}
+
+.saeron-about-card:hover .saeron-readmore-btn {
+  background: #1ea386;
+}
+
+/* ================= 새론 스타일 3단 카드 (공지/일정/갤러리) ================= */
+.saeron-board-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.saeron-board-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.saeron-board-card-header h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.saeron-plus-btn {
+  color: #64748b;
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.saeron-plus-btn:hover {
+  color: #28b899;
+  background: #eefaf7;
+}
+
+.saeron-notice-table-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.saeron-notice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 6px;
+  font-size: 13.5px;
+  transition: var(--transition);
+}
+
+.saeron-notice-row:hover {
+  background: #f8fafc;
+}
+
+.saeron-notice-title {
+  color: #28b899;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.saeron-notice-date {
+  color: #6b7280;
+  font-size: 12.5px;
+  flex-shrink: 0;
+}
+
+.saeron-cal-nav {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.saeron-cal-nav:hover {
+  border-color: #28b899;
+  color: #28b899;
+}
+
+.saeron-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+}
+
+.saeron-cal-weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 0;
+  background: #f8fafc;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.saeron-cal-cell {
+  height: 36px;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.saeron-cal-day {
+  font-size: 12px;
+  font-weight: 600;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.saeron-cal-day.today {
+  background: #28b899;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.saeron-cal-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #28b899;
+  position: absolute;
+  bottom: 2px;
 }
 
 /* ================= 새론 스타일 따뜻한 파스텔 히어로 ================= */
@@ -638,11 +952,11 @@ button {
 
 /* ================= 서브 히어로 & 탭 & 카드 ================= */
 .sub-hero {
-  background: linear-gradient(135deg, #fff1e6 0%, #ffedd5 55%, #eef7f2 100%);
-  color: #1c1917;
+  background: linear-gradient(135deg, #eefaf7 0%, #f8fafc 60%, #e0f2fe 100%);
+  color: #1f2937;
   padding: 48px 0;
   text-align: center;
-  border-bottom: 1px solid #fed7aa;
+  border-bottom: 1px solid #d1f4ec;
 }
 
 .sub-hero h1 {
@@ -652,13 +966,13 @@ button {
 }
 
 .sub-hero p {
-  color: #57534e;
+  color: #4b5563;
   font-size: 15.5px;
 }
 
 .sub-nav-tabs {
   background: #fff;
-  border-bottom: 1px solid #e7e5e4;
+  border-bottom: 1px solid #e5e7eb;
   box-shadow: var(--shadow-sm);
 }
 
@@ -672,33 +986,33 @@ button {
   padding: 15px 20px;
   font-size: 14.5px;
   font-weight: 700;
-  color: #57534e;
+  color: #4b5563;
   border-bottom: 3px solid transparent;
   transition: var(--transition);
 }
 
 .sub-nav-tab:hover, .sub-nav-tab.active {
-  color: var(--primary-600);
-  border-bottom-color: var(--primary-600);
+  color: var(--primary-500);
+  border-bottom-color: var(--primary-500);
 }
 
 .card-box {
   background: #fff;
   border-radius: 18px;
   padding: 28px;
-  border: 1px solid #e7e5e4;
+  border: 1px solid #e5e7eb;
   box-shadow: var(--shadow-sm);
   margin-bottom: 24px;
 }
 
 .form-group { margin-bottom: 18px; }
-.form-label { display: block; font-size: 13.5px; font-weight: 700; color: #44403c; margin-bottom: 6px; }
+.form-label { display: block; font-size: 13.5px; font-weight: 700; color: #374151; margin-bottom: 6px; }
 
 .form-input, .form-select, .form-textarea {
   width: 100%;
   padding: 11px 14px;
   font-size: 14px;
-  border: 1px solid #d6d3d1;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-family: inherit;
   background: #fff;
@@ -707,12 +1021,12 @@ button {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-600);
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.14);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(40, 184, 153, 0.16);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #28b899, #1ea386);
   color: #fff;
   font-weight: 700;
   font-size: 14.5px;
