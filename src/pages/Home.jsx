@@ -128,7 +128,7 @@ export default function Home({ setRoute, openPostDetail }) {
       >
         <div
           className="saeron-hero-slide"
-          style={{ backgroundImage: `url('${activeBanner.image || "/images/hero_banner.jpg"}')` }}
+          style={{ backgroundImage: `url('${activeBanner.image || "/images/banner_real_2.jpg"}')` }}
         >
           <div className="saeron-hero-overlay"></div>
 

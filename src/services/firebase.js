@@ -57,6 +57,25 @@ function initLocalStorage() {
   }
   if (!localStorage.getItem(STORAGE_KEY_BANNERS)) {
     localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(INITIAL_BANNERS));
+  } else {
+    try {
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY_BANNERS) || "[]");
+      let changed = false;
+      const updated = existing.map((b) => {
+        if (b.id === "sbw-banner-1" && b.image === "/images/hero_banner.jpg") {
+          changed = true;
+          return { ...b, image: "/images/banner_real_2.jpg" };
+        }
+        if (b.id === "sbw-banner-2" && b.image === "/images/saebyeotwon.jpg") {
+          changed = true;
+          return { ...b, image: "/images/banner_real_1.jpg" };
+        }
+        return b;
+      });
+      if (changed) localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(updated));
+    } catch (e) {
+      localStorage.setItem(STORAGE_KEY_BANNERS, JSON.stringify(INITIAL_BANNERS));
+    }
   }
   if (!localStorage.getItem(STORAGE_KEY_DONATIONS)) {
     localStorage.setItem(
