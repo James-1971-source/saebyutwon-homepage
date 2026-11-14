@@ -118,7 +118,7 @@ export default function Footer({ setRoute }) {
             >
               <option value="">법인 및 유관기관 바로가기 (Family Site)</option>
               <optgroup label="사회복지법인 새볕재단 및 산하시설">
-                <option value="https://saebyut-foundation.web.app">사회복지법인 새볕재단 (법인본부)</option>
+                <option value="https://saebyut-foundation-v2.web.app">사회복지법인 새볕재단 (법인본부)</option>
                 <option value="about-foundation">새볕실버빌 (노인전문요양시설)</option>
                 <option value="about-foundation">새볕실버케어센터 (재가장기요양기관)</option>
               </optgroup>

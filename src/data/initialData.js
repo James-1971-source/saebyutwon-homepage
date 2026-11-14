@@ -5,7 +5,7 @@ export const FACILITY_INFO = {
   shortName: "새볕원",
   englishName: "SAEBYUTWON",
   foundationName: "사회복지법인 새볕재단",
-  foundationUrl: "https://saebyut-foundation.web.app",
+  foundationUrl: "https://saebyut-foundation-v2.web.app",
   slogan: "아이들의 오늘을 지키고, 내일을 함께 준비합니다",
   subSlogan: "모든 아이들은 안전하게 보호받을 권리, 존중받을 권리, 사랑받으며 성장할 권리가 있습니다.",
   established: "1958년 12월 29일 (최초 사회사업 1955년)",
